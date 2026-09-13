@@ -1,0 +1,74 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SumTalsa App</title>
+<style>
+:root{--p:#0d6f61;--bg:#f5f8f7;--line:#dbe6e2;--ink:#17231f;--muted:#64736e}*{box-sizing:border-box}body{margin:0;font-family:Arial;background:var(--bg);color:var(--ink)}
+button,input,select,textarea{font:inherit}.login{min-height:100vh;display:grid;place-items:center;padding:22px}.box,.card{background:white;border:1px solid var(--line);border-radius:16px;padding:20px}.box{width:min(520px,100%)}
+label{display:block;font-weight:700;font-size:13px;margin:10px 0 5px}input,select,textarea{width:100%;padding:10px;border:1px solid #ccd9d4;border-radius:9px}.btn{border:0;border-radius:9px;padding:10px 14px;font-weight:800;cursor:pointer}.primary{background:var(--p);color:white}.secondary{background:#eef3f1}
+.app{display:none;grid-template-columns:250px 1fr;min-height:100vh}aside{background:#12362f;color:white;padding:16px}.navbtn{display:block;width:100%;text-align:left;background:transparent;border:0;color:white;padding:10px;border-radius:8px;cursor:pointer}.navbtn:hover,.navbtn.active{background:#1b5248}
+.top{background:white;border-bottom:1px solid var(--line);padding:13px 18px;display:flex;justify-content:space-between;align-items:center}.content{padding:18px}section{display:none}section.active{display:block}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.g3{grid-template-columns:repeat(3,1fr)}
+.output{white-space:pre-wrap;background:#f8fbfa;border:1px solid var(--line);border-radius:10px;padding:12px;min-height:130px}.small{font-size:13px;color:var(--muted)}.notice{padding:10px;border-radius:10px;background:#fff8e6;border:1px solid #efdda4}
+@media(max-width:850px){.app{grid-template-columns:1fr}aside{position:relative}.grid,.g3{grid-template-columns:1fr}}
+</style></head><body>
+<div id="login" class="login"><div class="box"><h2 style="color:#0d6f61">SumTalsa</h2><p class="small">Sign in or register for the production-ready pilot.</p>
+<label>Email</label><input id="email" value="teacher@sumtalsa.local"><label>Password</label><input id="password" type="password" value="Teacher123!">
+<div style="display:flex;gap:8px;margin-top:12px"><button class="btn primary" onclick="signIn()">Sign In</button><button class="btn secondary" onclick="showRegister()">Register</button><a class="btn secondary" href="/">Home</a></div>
+<div id="registerBox" style="display:none"><hr><label>Full name</label><input id="regName"><label>Email</label><input id="regEmail"><label>Password (8+ chars)</label><input id="regPassword" type="password"><label>Role</label><select id="regRole"><option value="teacher">Teacher</option><option value="student">Student</option><option value="parent">Parent</option><option value="school_admin">School Admin</option></select><label>School</label><input id="regSchool"><button class="btn primary" style="margin-top:10px" onclick="register()">Create account</button></div>
+<div id="loginMsg" class="small" style="margin-top:10px"></div></div></div>
+
+<div id="app" class="app"><aside><h2>SumTalsa</h2><div id="nav"></div></aside><main><div class="top"><div><strong id="title">Dashboard</strong><div id="sub" class="small"></div></div><button class="btn secondary" onclick="logout()">Logout</button></div><div class="content">
+
+<section id="dashboard"><div class="grid g3"><div class="card"><h3>Resources</h3><div id="mResources">0</div></div><div class="card"><h3>Interventions</h3><div id="mInterventions">0</div></div><div class="card"><h3>Account</h3><div id="mRole"></div></div></div><div class="card" style="margin-top:14px"><div class="notice">Teacher review is mandatory for high-stakes use. Curriculum records are not authoritative until verified.</div></div></section>
+
+<section id="generate"><div class="grid"><div class="card"><h3>AI Generation</h3><label>Module</label><select id="genModule"><option value="lesson">Lesson Builder</option><option value="exam">Exam Forge</option><option value="assistant">Teacher Assistant</option></select><label>Prompt</label><textarea id="genPrompt">Create a Form II Geography lesson on map scale using learner-centered activities.</textarea><button class="btn primary" style="margin-top:10px" onclick="generateAI()">Generate</button></div><div class="card"><h3>Output</h3><div id="genOut" class="output"></div><label>Title</label><input id="saveTitle" value="Generated Resource"><button class="btn secondary" style="margin-top:10px" onclick="saveGenerated()">Save resource</button></div></div></section>
+
+<section id="results"><div class="grid"><div class="card"><h3>Results Analyzer</h3><textarea id="resultData">Asha,74
+Baraka,63
+Chausiku,41
+David,82
+Ester,58
+Faraja,35</textarea><button class="btn primary" style="margin-top:10px" onclick="analyzeResults()">Analyze</button></div><div class="card"><h3>Report</h3><div id="resultOut" class="output"></div></div></div></section>
+
+<section id="items"><div class="grid"><div class="card"><h3>Item Analysis</h3><textarea id="itemData">Asha,1,1,1,0,1
+Baraka,1,1,0,0,1
+Chausiku,1,0,0,0,0
+David,1,1,1,1,1
+Ester,1,0,1,0,1
+Faraja,0,0,0,0,1</textarea><button class="btn primary" style="margin-top:10px" onclick="analyzeItems()">Analyze</button></div><div class="card"><h3>Diagnostics</h3><div id="itemOut" class="output"></div></div></div></section>
+
+<section id="interventions"><div class="grid"><div class="card"><h3>Intervention Planner</h3><label>Learner/group</label><input id="intLearner" value="Form II Group A"><label>Topic</label><input id="intTopic" value="Map Reading"><label>Evidence</label><textarea id="intEvidence">Low performance in item analysis.</textarea><label>Type</label><select id="intType"><option>Re-teach concept</option><option>Small-group support</option><option>Practice task</option></select><button class="btn primary" style="margin-top:10px" onclick="saveIntervention()">Create & Save</button></div><div class="card"><h3>Saved Interventions</h3><div id="intList" class="output"></div></div></div></section>
+
+<section id="resources"><div class="card"><h3>Saved Resources</h3><div id="resourceList" class="output"></div></div></section>
+
+<section id="feedback"><div class="card"><h3>Feedback</h3><label>Module</label><input id="fbModule" value="Overall platform"><label>Rating 1–5</label><input id="fbRating" type="number" min="1" max="5" value="5"><label>Comment</label><textarea id="fbComment"></textarea><button class="btn primary" style="margin-top:10px" onclick="sendFeedback()">Submit</button></div></section>
+
+<section id="curriculum"><div class="grid"><div class="card"><h3>Curriculum Versions</h3><button class="btn secondary" onclick="loadCurriculum()">Refresh</button><div id="cvList" class="output" style="margin-top:10px"></div></div><div class="card" id="cvCreate"><h3>Create Version (Super Admin)</h3><label>Name</label><input id="cvName" value="Tanzania Secondary Curriculum"><label>Year</label><input id="cvYear" value="2023"><label>Source reference</label><textarea id="cvSource"></textarea><button class="btn primary" style="margin-top:10px" onclick="createCV()">Create Draft</button></div></div></section>
+
+</div></main></div>
+
+<script>
+let token=localStorage.getItem('sumtalsa_token')||'', user=null;
+const navByRole={
+ teacher:[['dashboard','Dashboard'],['generate','AI Tools'],['results','Results Analyzer'],['items','Item Analysis'],['interventions','Interventions'],['resources','Resources'],['feedback','Feedback'],['curriculum','Curriculum']],
+ student:[['dashboard','Dashboard'],['generate','Study Support'],['resources','Resources'],['feedback','Feedback']],
+ parent:[['dashboard','Dashboard'],['resources','Resources'],['feedback','Feedback']],
+ school_admin:[['dashboard','Dashboard'],['generate','AI Tools'],['results','Results Analyzer'],['items','Item Analysis'],['interventions','Interventions'],['resources','Resources'],['feedback','Feedback'],['curriculum','Curriculum']],
+ super_admin:[['dashboard','Dashboard'],['generate','AI Tools'],['results','Results Analyzer'],['items','Item Analysis'],['interventions','Interventions'],['resources','Resources'],['feedback','Feedback'],['curriculum','Curriculum']]
+};
+async function api(path,method='GET',body=null){let h={'Content-Type':'application/json'};if(token)h.Authorization='Bearer '+token;let r=await fetch(path,{method,headers:h,body:body?JSON.stringify(body):null});let j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.detail||'Request failed');return j}
+function showRegister(){registerBox.style.display=registerBox.style.display==='none'?'block':'none'}
+async function signIn(){try{let j=await api('/api/login','POST',{email:email.value,password:password.value});token=j.token;localStorage.setItem('sumtalsa_token',token);await boot()}catch(e){loginMsg.textContent=e.message}}
+async function register(){try{let j=await api('/api/register','POST',{full_name:regName.value,email:regEmail.value,password:regPassword.value,role:regRole.value,school_name:regSchool.value});token=j.token;localStorage.setItem('sumtalsa_token',token);await boot()}catch(e){loginMsg.textContent=e.message}}
+function logout(){localStorage.removeItem('sumtalsa_token');location.reload()}
+function show(id,label){document.querySelectorAll('section').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');title.textContent=label;sub.textContent=user.name+' • '+user.role}
+function buildNav(){nav.innerHTML='';for(let [id,label] of (navByRole[user.role]||navByRole.teacher)){let b=document.createElement('button');b.className='navbtn';b.textContent=label;b.onclick=()=>show(id,label);nav.appendChild(b)}}
+async function boot(){try{user=await api('/api/me');login.style.display='none';app.style.display='grid';buildNav();mRole.textContent=user.role;cvCreate.style.display=user.role==='super_admin'?'block':'none';show('dashboard','Dashboard');await refresh()}catch(e){localStorage.removeItem('sumtalsa_token')}}
+async function refresh(){let rs=await api('/api/resources').catch(()=>[]), ins=await api('/api/interventions').catch(()=>[]);mResources.textContent=rs.length;mInterventions.textContent=ins.length;resourceList.textContent=rs.map(r=>`${r.created_at}\\n${r.type} — ${r.title}\\n${r.content.slice(0,240)}...\\n`).join('\\n')||'No resources';intList.textContent=ins.map(x=>`${x.learner_or_group} — ${x.topic} (${x.type})`).join('\\n')||'No interventions'}
+async function generateAI(){genOut.textContent='Generating...';try{let j=await api('/api/generate','POST',{module:genModule.value,prompt:genPrompt.value});genOut.textContent=j.content+'\\n\\n[Teacher review required]'}catch(e){genOut.textContent=e.message}}
+async function saveGenerated(){await api('/api/resources','POST',{resource_type:genModule.value,title:saveTitle.value,content:genOut.textContent,language:'English'});await refresh();alert('Saved')}
+function analyzeResults(){let vals=resultData.value.trim().split(/\\n+/).map(x=>x.split(',')).map(r=>+r[1]).filter(Number.isFinite);if(!vals.length)return;let avg=vals.reduce((a,b)=>a+b,0)/vals.length;let pass=vals.filter(v=>v>=50).length/vals.length*100;resultOut.textContent=`Students: ${vals.length}\\nAverage: ${avg.toFixed(1)}%\\nPass rate (≥50): ${pass.toFixed(0)}%\\nHighest: ${Math.max(...vals)}%\\nLowest: ${Math.min(...vals)}%\\n\\nNext: use item analysis to identify specific competency gaps, then create an intervention.`}
+function analyzeItems(){let rows=itemData.value.trim().split(/\\n+/).map(x=>x.split(',')),n=Math.max(...rows.map(r=>r.length-1)),out=[];for(let j=1;j<=n;j++){let v=rows.map(r=>+r[j]).filter(x=>x===0||x===1),f=v.reduce((a,b)=>a+b,0)/v.length;out.push(`Q${j}: ${(f*100).toFixed(0)}% correct${f<.4?' — Priority review':''}`)}itemOut.textContent=out.join('\\n')+'\\n\\nReview items below 40%, check wording/prerequisites, re-teach the linked competency and reassess.'}
+async function saveIntervention(){let plan=`1. Diagnose misconception.\\n2. Re-teach using a different representation.\\n3. Guided practice.\\n4. Independent parallel task.\\n5. Reassess and compare improvement.`;await api('/api/interventions','POST',{learner_or_group:intLearner.value,topic:intTopic.value,evidence:intEvidence.value,intervention_type:intType.value,plan});await refresh();alert('Intervention saved')}
+async function sendFeedback(){await api('/api/feedback','POST',{module:fbModule.value,rating:+fbRating.value,comment:fbComment.value});fbComment.value='';alert('Thank you')}
+async function loadCurriculum(){let xs=await api('/api/curriculum/versions');cvList.textContent=xs.map(x=>`${x.name} — ${x.year}\\n${x.status}\\n${x.source_reference||''}`).join('\\n\\n')||'No versions'}
+async function createCV(){await api('/api/curriculum/versions','POST',{name:cvName.value,version_year:cvYear.value,status:'draft',source_reference:cvSource.value,notes:''});await loadCurriculum();alert('Draft created')}
+if(token)boot();
+</script></body></html>

@@ -1,0 +1,40 @@
+{
+  "registry_version": "2026-09-13",
+  "authority": "Tanzania Institute of Education (TIE) / Ministry of Education, Science and Technology",
+  "ordinary_secondary": {
+    "curriculum": {
+      "title": "Curriculum for Ordinary Secondary Education Form I–IV",
+      "year": "2023",
+      "approval_date": "2023-08-09",
+      "publisher": "Tanzania Institute of Education",
+      "isbn": "978-9987-09-856-9",
+      "url": "https://www.tie.go.tz/uploads/documents/en-1726825742-CURRICULUM%20FOR%20SECONDARY%20EDUCATION%20FORM%20I-IV.pdf",
+      "verified_source": true
+    },
+    "syllabus_indexes": [
+      {
+        "title": "Lower Secondary Academic Syllabuses - Page 1",
+        "url": "https://tie.go.tz/index.php/publications/syllabus-for-lower-secondary-academics?page=1",
+        "verified_source": true
+      },
+      {
+        "title": "Lower Secondary Academic Syllabuses - Page 2",
+        "url": "https://tie.go.tz/publications/syllabus-for-lower-secondary-academics?page=2",
+        "verified_source": true
+      },
+      {
+        "title": "Lower Secondary Academic Syllabuses - Page 3",
+        "url": "https://www.tie.go.tz/publications/syllabus-for-lower-secondary-academics?page=3",
+        "verified_source": true
+      }
+    ]
+  },
+  "advanced_secondary": {
+    "syllabus_index": {
+      "title": "Upper Secondary Education Syllabuses",
+      "url": "https://www.tie.go.tz/publications/syllabus-for-upper-secondary-education?page=2",
+      "verified_source": true
+    }
+  },
+  "note": "This registry verifies authoritative source locations. Individual competency/topic nodes must be reviewed against the relevant official syllabus before setting verified=true."
+}
