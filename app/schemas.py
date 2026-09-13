@@ -12,6 +12,21 @@ class RegisterIn(BaseModel):
     role:str="teacher"
     school_name:Optional[str]=None
 
+class AdminSchoolIn(BaseModel):
+    name:str=Field(min_length=2,max_length=180)
+    region:Optional[str]=None
+    council:Optional[str]=None
+
+class AdminUserIn(BaseModel):
+    full_name:str=Field(min_length=2,max_length=180)
+    email:str
+    password:str=Field(min_length=8)
+    role:str="teacher"
+    school_id:Optional[int]=None
+
+class UserStatusIn(BaseModel):
+    active:bool
+
 class ResourceIn(BaseModel):
     resource_type:str
     title:str
