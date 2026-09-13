@@ -1,0 +1,11 @@
+services:
+  sumtalsa:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - SECRET_KEY=replace-this-secret
+      - DATABASE_URL=sqlite:///./data/sumtalsa.db
+      - AI_PROVIDER=mock
+    volumes:
+      - ./data:/app/data
