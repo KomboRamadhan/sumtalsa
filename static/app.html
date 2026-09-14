@@ -233,6 +233,5 @@ function continueTuition(){
   el('genPrompt').value=`I am studying ${subject}, topic: ${topic}, at ${user.education_level} ${user.class_level}. Continue tutoring me and answer this question: `;
   el('genPrompt').focus();
 }
-);$('learnMsg').textContent='Learning level saved.';await refresh()}catch(e){$('learnMsg').textContent=e.message}}
 if(token)boot();else loadPublicData();
 </script></body></html>
