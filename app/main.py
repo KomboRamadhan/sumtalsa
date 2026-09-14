@@ -31,7 +31,7 @@ def migrate_schema():
     _add_column_if_missing("resources","visibility","VARCHAR(20) DEFAULT 'school'")
 
 migrate_schema()
-app=FastAPI(title="SumTalsa API",version="1.4.0")
+app=FastAPI(title="SumTalsa API",version="1.6.0")
 
 if os.getenv("FORCE_HTTPS","false").lower()=="true":
     app.add_middleware(HTTPSRedirectMiddleware)
@@ -97,7 +97,7 @@ def user_payload(user):
             "education_level":user.education_level,"class_level":user.class_level}
 
 @app.get("/api/health")
-def health(): return {"ok":True,"service":"SumTalsa","version":"1.4.0"}
+def health(): return {"ok":True,"service":"SumTalsa","version":"1.6.0"}
 
 @app.get("/api/public/education-levels")
 def public_education_levels(): return EDUCATION_LEVELS
@@ -225,12 +225,110 @@ def resource_payload(x):
     return {"id":x.id,"type":x.resource_type,"material_type":x.material_type or x.resource_type,"education_level":x.education_level or "","class_level":x.class_level or "",
             "subject_name":x.subject_name or "","visibility":x.visibility or "school","title":x.title,"content":x.content,"language":x.language,"created_at":x.created_at.isoformat() if x.created_at else ""}
 
+
+@app.get("/api/teacher/resources")
+def teacher_resources(education_level:str=Query(default=""),class_level:str=Query(default=""),
+                      subject:str=Query(default=""),material_type:str=Query(default=""),
+                      db:Session=Depends(get_db),
+                      user=Depends(require_roles("teacher","school_admin","super_admin"))):
+    q=db.query(models.Resource)
+    if user.role=="teacher":
+        q=q.filter(or_(models.Resource.owner_id==user.id,
+                       (models.Resource.visibility=="school") & (models.Resource.school_id==user.school_id),
+                       models.Resource.visibility=="public"))
+    elif user.role=="school_admin":
+        q=q.filter(or_((models.Resource.visibility=="school") & (models.Resource.school_id==user.school_id),
+                       models.Resource.visibility=="public"))
+    if education_level: q=q.filter(models.Resource.education_level==education_level)
+    if class_level: q=q.filter(models.Resource.class_level==class_level)
+    if subject: q=q.filter(models.Resource.subject_name==subject)
+    if material_type: q=q.filter(models.Resource.material_type==material_type)
+    items=q.order_by(models.Resource.id.desc()).limit(300).all()
+    return [resource_payload(x) for x in items]
+
 @app.get("/api/resources")
 def list_resources(db:Session=Depends(get_db),user=Depends(current_user)):
     q=db.query(models.Resource)
     if user.role=="school_admin": q=q.filter(models.Resource.school_id==user.school_id)
     elif user.role!="super_admin": q=q.filter(models.Resource.owner_id==user.id)
     return [resource_payload(x) for x in q.order_by(models.Resource.id.desc()).limit(200).all()]
+
+
+# Subject catalogue for SumTalsa Learn.
+# It is a platform navigation catalogue based on current TIE curriculum/syllabus listings.
+# Actual subjects offered by an individual school may be a subset.
+SUBJECT_CATALOG={
+    "Primary Education":[
+        "Kiswahili","English Language","Mathematics","Science",
+        "Geography and Environment","History of Tanzania and Ethics",
+        "Arts and Sports","Islamic Religious Education","Bible Knowledge",
+        "Arabic","Chinese","French"
+    ],
+    "Ordinary Level":[
+        "Agriculture","Additional Mathematics","Arabic","Basic Mathematics",
+        "Bible Knowledge","Biology","Bookkeeping","Business Studies","Chemistry",
+        "Chinese","Computer Science","Elimu ya Dini ya Kiislamu","English Language",
+        "Fasihi ya Kiswahili","Fine Art","Food and Human Nutrition","French",
+        "Geography","Historia ya Tanzania na Maadili","History",
+        "Kiswahili","Literature in English","Music","Physics","Sport Studies",
+        "Textile and Garment Construction","Theatre Arts"
+    ],
+    "Advanced Level":[
+        "Academic Communication","Accountancy","Agriculture","Arabic",
+        "Basic Applied Mathematics","Biology","Business Studies","Chemistry",
+        "Chinese","Computer Science","Divinity","Economics","Elimu ya Dini ya Kiislamu",
+        "English Language","Fasihi ya Kiswahili","Fine Art","Food and Human Nutrition",
+        "French","Geography","Historia ya Tanzania na Maadili","History",
+        "Kiswahili","Literature in English","Mathematics","Music","Physics",
+        "Sport Studies","Textile and Garment Construction","Theatre Arts","Tourism"
+    ],
+}
+
+MATERIAL_TYPES=[
+    "Study Notes","Summary","Worked Examples","Practice Exercise",
+    "Revision Questions","Quiz","Past-paper Style Practice","Flashcards",
+    "Study Plan","Teacher Resource"
+]
+
+@app.get("/api/learn/catalog")
+def learn_catalog(user=Depends(current_user)):
+    return {
+        "levels":EDUCATION_LEVELS,
+        "subjects":SUBJECT_CATALOG,
+        "material_types":MATERIAL_TYPES,
+        "profile":{
+            "education_level":user.education_level or "",
+            "class_level":user.class_level or "",
+            "locked":user.role=="student"
+        },
+        "note":"Subject catalogue follows current Tanzania curriculum/syllabus listings; actual school subject offerings may vary."
+    }
+
+@app.get("/api/learn/topics")
+def learn_topics(subject:str=Query(default=""),class_level:str=Query(default=""),
+                 db:Session=Depends(get_db),user=Depends(current_user)):
+    level=user.education_level if user.role=="student" else ""
+    cls=user.class_level if user.role=="student" else class_level
+    q=db.query(models.CurriculumNode).filter(
+        models.CurriculumNode.verified==True,
+        models.CurriculumNode.subject_name==subject
+    )
+    if cls:
+        q=q.filter(models.CurriculumNode.class_level==cls)
+    rows=q.order_by(models.CurriculumNode.id.asc()).limit(500).all()
+    topics=[]
+    seen=set()
+    for r in rows:
+        label=(r.topic or r.specific_competency or r.competency or "").strip()
+        if label and label not in seen:
+            seen.add(label)
+            topics.append({
+                "topic":label,
+                "subtopic":(r.subtopic or "").strip(),
+                "learning_outcome":(r.learning_outcome or "").strip(),
+                "verified":bool(r.verified)
+            })
+    return {"education_level":level,"class_level":cls,"subject":subject,"topics":topics}
 
 @app.get("/api/learn/resources")
 def learn_resources(education_level:str=Query(default=""),class_level:str=Query(default=""),subject:str=Query(default=""),material_type:str=Query(default=""),db:Session=Depends(get_db),user=Depends(current_user)):
