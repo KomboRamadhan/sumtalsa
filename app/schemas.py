@@ -6,11 +6,20 @@ class LoginIn(BaseModel):
     password:str
 
 class RegisterIn(BaseModel):
-    full_name:str
+    full_name:str=Field(min_length=2,max_length=180)
     email:str
     password:str=Field(min_length=8)
     role:str="teacher"
+    school_id:Optional[int]=None
     school_name:Optional[str]=None
+    education_level:Optional[str]=None
+    class_level:Optional[str]=None
+
+class ForgotPasswordIn(BaseModel):
+    email:str
+
+class AdminPasswordResetIn(BaseModel):
+    password:str=Field(min_length=8)
 
 class AdminSchoolIn(BaseModel):
     name:str=Field(min_length=2,max_length=180)
@@ -23,15 +32,26 @@ class AdminUserIn(BaseModel):
     password:str=Field(min_length=8)
     role:str="teacher"
     school_id:Optional[int]=None
+    education_level:Optional[str]=None
+    class_level:Optional[str]=None
 
 class UserStatusIn(BaseModel):
     active:bool
+
+class ProfileEducationIn(BaseModel):
+    education_level:str
+    class_level:str
 
 class ResourceIn(BaseModel):
     resource_type:str
     title:str
     content:str
     language:str="English"
+    material_type:Optional[str]=None
+    education_level:Optional[str]=None
+    class_level:Optional[str]=None
+    subject_name:Optional[str]=None
+    visibility:str="school"
 
 class InterventionIn(BaseModel):
     learner_or_group:str
